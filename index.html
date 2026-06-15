@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#0b1120"/>
+<title>OFFAPS — Welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800&family=Lalezar&family=Vazirmatn:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+ --gold:#f7b733;--cyan:#34d8ee;--blue:#4a90e2;
+ /* CHANGE THIS to your site's first page */
+ --target:'Flood_Impact_Brief.html';
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Vazirmatn','Cairo','Segoe UI',Tahoma,sans-serif;background:#0b1120;color:#fff;overflow:hidden}
+#splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ transition:opacity .65s ease, transform .65s ease;}
+#splash.fade{opacity:0;transform:scale(1.04);pointer-events:none}
+/* blurred fill behind + sharp poster in front */
+.bg{position:absolute;inset:0;background-image:url('poster.png');background-size:cover;background-position:center;filter:blur(26px) brightness(.42);transform:scale(1.15)}
+.veil{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(11,17,32,.25),rgba(11,17,32,.82))}
+.poster{position:relative;z-index:2;max-width:min(94vw,820px);max-height:74vh;width:auto;height:auto;
+ border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.6);object-fit:contain;background:#0b1120}
+.fallback{position:relative;z-index:2;text-align:center;padding:28px;display:none}
+.fallback .lg{font-family:'Lalezar','Vazirmatn',sans-serif;font-size:46px;background:linear-gradient(90deg,#fff,#bcd3f0,#34d8ee);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.fallback p{color:#aebccf;font-size:15px;margin-top:8px;line-height:1.9}
+.fallback .note{margin-top:14px;font-size:12px;color:#7e8ca0;border:1px dashed #2c3f5e;border-radius:10px;padding:10px 14px;display:inline-block}
+.enter{position:relative;z-index:3;margin-top:26px;display:inline-flex;align-items:center;gap:11px;cursor:pointer;
+ font-family:'Vazirmatn','Cairo',sans-serif;font-size:18px;font-weight:800;color:#06222e;border:none;border-radius:14px;padding:14px 34px;
+ background:linear-gradient(135deg,var(--cyan),var(--blue));box-shadow:0 8px 26px rgba(52,216,238,.5);
+ animation:bob 2.2s ease-in-out infinite;transition:transform .15s}
+.enter:hover{transform:translateY(-2px) scale(1.04)}
+.enter .ar{font-size:18px}
+.enter::after{content:'';position:absolute;inset:0;border-radius:14px;box-shadow:0 0 0 0 rgba(52,216,238,.55);animation:ring 2.2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(52,216,238,.55)}70%{box-shadow:0 0 0 18px rgba(52,216,238,0)}100%{box-shadow:0 0 0 0 rgba(52,216,238,0)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hint{position:relative;z-index:3;margin-top:12px;font-size:12px;color:#9fb0c6}
+.langs{position:fixed;top:14px;inset-inline-end:14px;z-index:4;display:flex;gap:6px}
+.lng{font-size:13px;font-weight:800;border:1px solid #2c3f5e;background:rgba(20,33,59,.8);color:#aebccf;border-radius:9px;padding:7px 12px;cursor:pointer}
+.lng.on{background:linear-gradient(135deg,var(--gold),#ffd36a);color:#3a2400;border-color:#ffcf6a}
+.en,.fa,.ar{display:none}
+html[lang=en] .en{display:inline}html[lang=fa] .fa{display:inline}html[lang=ar] .ar{display:inline}
+@media(max-width:640px){.poster{max-height:64vh}.enter{font-size:16px;padding:12px 26px}.fallback .lg{font-size:34px}}
+</style>
+</head>
+<body>
+<div id="splash">
+ <div class="bg"></div>
+ <div class="veil"></div>
+
+ <div class="langs">
+  <button class="lng on" id="len" onclick="setLang('en')">EN</button>
+  <button class="lng" id="lfa" onclick="setLang('fa')">فارسی</button>
+  <button class="lng" id="lar" onclick="setLang('ar')">عربی</button>
+ </div>
+
+ <img class="poster" id="poster" alt="OFFAPS poster" src="poster.png" onerror="this.style.display='none';document.getElementById('fb').style.display='block';"/>
+
+ <div class="fallback" id="fb">
+  <div class="lg">OFFAPS</div>
+  <p style="color:#c9a7f0;font-weight:800;font-size:19px;margin-top:4px">Forecast the Impact. Not Just the Storm.</p>
+  <p><span class="en">Flood &amp; Cyclone Impact Forecasting</span><span class="fa">سامانهٔ پیش‌بینی تأثیر سیلاب و سایکلون</span><span class="ar">نظام التنبؤ بآثار الفيضانات والأعاصير</span></p>
+  <div class="note"><span class="en">Add your poster as <b>poster.png</b> next to this page to show it here.</span><span class="fa">پوستر را با نام <b>poster.png</b> کنار این صفحه بگذارید تا اینجا نمایش داده شود.</span><span class="ar">أضِف الملصق باسم <b>poster.png</b> بجوار هذه الصفحة لعرضه هنا.</span></div>
+ </div>
+
+ <button class="enter" id="enterBtn">
+  <span>▶</span>
+  <span class="en">Enter</span><span class="fa">ورود</span><span class="ar">دخول</span>
+ </button>
+ <div class="hint"><span class="en">Click Enter or press the spacebar</span><span class="fa">روی «ورود» کلیک کنید یا کلید فاصله را بزنید</span><span class="ar">انقر «دخول» أو اضغط مسافة</span></div>
+</div>
+
+<script>
+var TARGET='Flood_Impact_Brief.html'; // change to your first page filename
+function go(){
+ var s=document.getElementById('splash');
+ s.classList.add('fade');
+ setTimeout(function(){ window.location.href=TARGET; },650);
+}
+document.getElementById('enterBtn').addEventListener('click',go);
+document.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();go();} });
+function setLang(l){
+ document.documentElement.lang=l;
+ document.documentElement.dir=(l==='en')?'ltr':'rtl';
+ ['en','fa','ar'].forEach(function(x){document.getElementById('l'+x).classList.toggle('on',x===l);});
+}
+setLang('en');
+</script>
+</body>
+</html>
