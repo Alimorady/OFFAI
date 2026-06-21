@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OFFAPS — Oman flood ecosystem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Vazirmatn:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+ --bg:#101a2b;--panel:#1d2c45;--card:#243352;--border:#3c5277;--text:#eef3fa;--muted:#aebccf;
+ --blue:#4a90e2;--cyan:#34d8ee;--gold:#f7b733;--green:#33c46a;--red:#f15b5b;--purple:#a855f7;--amber:#fb923c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Vazirmatn','Cairo','Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+html[lang=ar] body{font-family:'Cairo','Vazirmatn','Segoe UI',Tahoma,sans-serif}
+header{padding:14px 22px 10px;border-bottom:1px solid var(--border);background:#142138}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+header h1{font-size:18px;color:#fff;line-height:1.4}
+header p{font-size:11.5px;color:var(--muted);margin-top:5px;max-width:980px;line-height:1.85}
+.langs{display:flex;gap:7px;background:rgba(255,255,255,.05);padding:5px;border-radius:13px;border:1px solid var(--border);flex-shrink:0}
+.lng{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:9px;padding:7px 13px;cursor:pointer;transition:.15s}
+.lng .fl{font-size:17px;line-height:1}
+.lng:hover{color:#fff;background:rgba(255,255,255,.08)}
+.lng.on{background:linear-gradient(135deg,var(--gold),#ffd36a);color:#3a2400;border-color:#ffcf6a;box-shadow:0 3px 12px rgba(247,183,51,.5)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:11px}
+.legend span{display:flex;align-items:center;gap:5px;color:var(--muted)}
+.dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+.steps{display:flex;gap:6px;flex-wrap:wrap;padding:10px 22px;border-bottom:1px solid var(--border)}
+.step{font-size:11px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted)}
+.step b{color:var(--text)}
+.step.ok{border-color:#2f8a4a;background:rgba(51,196,106,.12)}
+.step.half{border-color:#8a6d00;background:rgba(247,183,51,.12)}
+.step.gap{border-color:#7f2a35;background:rgba(241,91,91,.14)}
+.step.gap b{color:#ffb3b3}
+.wrap{display:flex;gap:0;align-items:stretch;min-height:calc(100vh - 165px)}
+.diagram{flex:1;overflow:auto;padding:10px 6px 16px 10px}
+svg{min-width:1180px}
+.info{width:374px;flex-shrink:0;border-inline-start:1px solid var(--border);padding:16px;background:var(--panel);overflow-y:auto}
+.info h2{font-size:14.5px;color:var(--gold);margin-bottom:2px}
+.info .own{font-size:11px;color:var(--cyan);margin-bottom:8px}
+.info .st{display:inline-block;font-size:10px;padding:2px 9px;border-radius:20px;margin-bottom:10px}
+.info h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:11px 0 4px}
+.info p,.info li{font-size:12px;line-height:1.9;text-align:justify}
+.info ul{margin-inline-start:18px}
+.info .gapbox{background:rgba(241,91,91,.10);border:1px solid #7f2a35;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.85;margin-top:10px}
+.info .plusbox{background:rgba(51,196,106,.10);border:1px solid #2f8a4a;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.85;margin-top:10px}
+.hint{font-size:11.5px;color:var(--muted);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;line-height:1.9}
+.node{cursor:pointer}.node rect{transition:.15s}.node:hover rect{filter:brightness(1.3)}
+.node.sel rect{stroke:#fff !important;stroke-width:2.2}
+.node text{pointer-events:none}
+.edge{stroke-width:1.4;fill:none;opacity:.28;transition:.15s}.edge.hl{opacity:1;stroke-width:2.6}.edge.dim{opacity:.07}
+.lnk{cursor:pointer}.lnk circle{transition:.15s}.lnk:hover circle{filter:brightness(1.6);stroke-width:2.2}
+.lnkrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}
+.lnkbtn{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--cyan);text-decoration:none;border:1px solid var(--border);background:var(--card);border-radius:20px;padding:5px 11px;transition:.15s}
+.lnkbtn:hover{border-color:var(--cyan);background:rgba(52,216,238,.10)}
+.lane-t{font-size:12px;font-weight:bold;fill:#aebccf}
+.lane-l{stroke:#2b3c5a;stroke-dasharray:3 5}
+footer{padding:9px 22px;font-size:10px;color:var(--muted);border-top:1px solid var(--border)}
+.en,.fa,.ar{display:none}
+html[lang=en] .en{display:inline}html[lang=fa] .fa{display:inline}html[lang=ar] .ar{display:inline}
+@media(max-width:900px){.wrap{flex-direction:column}.info{width:auto;border:none;border-top:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<header>
+ <div class="topbar">
+  <div>
+   <h1><span class="en">Oman flood-management ecosystem — who does what, and where OFFAPS completes the cycle</span><span class="fa">اکوسیستم مدیریت سیلاب عمان — چه‌کسی چه می‌کند و OFFAPS کجای چرخه را کامل می‌کند؟</span><span class="ar">منظومة إدارة الفيضانات في عُمان — مَن يفعل ماذا، وأين يُكمل OFFAPS الدورة</span></h1>
+   <p><span class="en">Click any system to see its description, inputs, outputs and gap; related data flows highlight. Data flows from right (monitoring) toward left (decision); the lower return arrow is the verification loop that is missing today.</span><span class="fa">روی هر سامانه کلیک کنید تا شرح، ورودی‌ها، خروجی‌ها و شکافش را ببینید؛ جریان‌های دادهٔ مرتبط روشن می‌شود. جریان داده از راست (پایش) به چپ (تصمیم) است و فلش بازگشتی پایین، حلقهٔ راستی‌آزمایی است که امروز وجود ندارد.</span><span class="ar">انقر على أيّ نظام لرؤية وصفه ومدخلاته ومخرجاته وفجوته؛ وتُضاء تدفّقات البيانات المرتبطة. تتدفّق البيانات من اليمين (الرصد) نحو اليسار (القرار)؛ والسهم العائد في الأسفل هو حلقة التحقّق المفقودة اليوم.</span></p>
+  </div>
+  <div class="langs">
+   <button class="lng on" id="len" onclick="setLang('en')"><span class="fl">🇬🇧</span>EN</button>
+   <button class="lng" id="lfa" onclick="setLang('fa')"><span class="fl">🇮🇷</span>فارسی</button>
+   <button class="lng" id="lar" onclick="setLang('ar')"><span class="fl">🇴🇲</span>عربی</button>
+  </div>
+ </div>
+ <div class="legend">
+  <span><i class="dot" style="background:var(--blue)"></i><span class="en">Active government system</span><span class="fa">سامانهٔ فعال دولتی</span><span class="ar">نظام حكومي فعّال</span></span>
+  <span><i class="dot" style="background:var(--amber)"></i><span class="en">Ongoing project (consultants)</span><span class="fa">پروژهٔ در حال اجرا (مشاوران)</span><span class="ar">مشروع جارٍ (استشاريون)</span></span>
+  <span><i class="dot" style="background:var(--purple)"></i><span class="en">Global system/data</span><span class="fa">سامانه/دادهٔ جهانی</span><span class="ar">نظام/بيانات عالمية</span></span>
+  <span><i class="dot" style="background:var(--green)"></i><span class="en">OFFAPS (proposed)</span><span class="fa">OFFAPS (پیشنهادی)</span><span class="ar">OFFAPS (مقترح)</span></span>
+  <span><i class="dot" style="background:transparent;border:1px dashed var(--red)"></i><span class="en">Current gap</span><span class="fa">شکاف فعلی</span><span class="ar">الفجوة الحالية</span></span>
+ </div>
+</header>
+
+<div class="steps">
+ <span class="step ok"><b><span class="en">1. Monitoring</span><span class="fa">۱. پایش</span><span class="ar">١. الرصد</span></b> ✓ <span class="en">Muzn</span><span class="fa">مُزن</span><span class="ar">مُزن</span></span>
+ <span class="step ok"><b><span class="en">2. Weather &amp; cyclone forecast</span><span class="fa">۲. پیش‌بینی جوّی و سایکلون</span><span class="ar">٢. التنبؤ الجوي والإعصاري</span></b> ✓ COSMO/ICON</span>
+ <span class="step half"><b><span class="en">3. Rainfall-threshold warning</span><span class="fa">۳. هشدار آستانه‌ای بارش</span><span class="ar">٣. إنذار عتبة المطر</span></b> ~ FFGS + <span class="en">2025 Index</span><span class="fa">شاخص ۲۰۲۵</span><span class="ar">مؤشّر ٢٠٢٥</span></span>
+ <span class="step half"><b><span class="en">4. Static maps &amp; infrastructure</span><span class="fa">۴. نقشهٔ ایستا و زیرساخت</span><span class="ar">٤. خرائط ساكنة وبنية تحتية</span></b> ~ <span class="en">underway</span><span class="fa">در حال اجرا</span><span class="ar">جارٍ</span></span>
+ <span class="step gap"><b><span class="en">5. Real-time sub-basin impact + exposure</span><span class="fa">۵. اثرِ بلادرنگ زیرحوضه‌ای + مواجهه</span><span class="ar">٥. أثر آني للأحواض + التعرّض</span></b> ✗ → OFFAPS</span>
+ <span class="step gap"><b><span class="en">6. Targeted decision (crossing/closure/relief)</span><span class="fa">۶. تصمیم هدفمند (گذرگاه/تعطیلی/امداد)</span><span class="ar">٦. قرار موجّه (معبر/إغلاق/إغاثة)</span></b> ✗ → OFFAPS</span>
+ <span class="step gap"><b><span class="en">7. Verification &amp; learning</span><span class="fa">۷. راستی‌آزمایی و یادگیری</span><span class="ar">٧. التحقّق والتعلّم</span></b> ✗ → OFFAPS</span>
+</div>
+
+<div class="wrap">
+<div class="info" id="info"></div>
+<div class="diagram">
+<svg viewBox="0 0 1180 700" xmlns="http://www.w3.org/2000/svg">
+ <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+ <line class="lane-l" x1="880" y1="36" x2="880" y2="540"/><line class="lane-l" x1="600" y1="36" x2="600" y2="540"/><line class="lane-l" x1="305" y1="36" x2="305" y2="540"/>
+ <text class="lane-t" id="lane0" x="1030" y="28" text-anchor="middle"></text>
+ <text class="lane-t" id="lane1" x="740" y="28" text-anchor="middle"></text>
+ <text class="lane-t" id="lane2" x="452" y="28" text-anchor="middle"></text>
+ <text class="lane-t" id="lane3" x="150" y="28" text-anchor="middle"></text>
+ <g id="edges"></g>
+ <rect x="60" y="555" width="850" height="118" rx="14" fill="rgba(241,91,91,.06)" stroke="#7f2a35" stroke-dasharray="6 5"/>
+ <text id="gaptext" x="895" y="575" text-anchor="end" font-size="11" fill="#ffb3b3"></text>
+ <g id="nodes"></g>
+</svg>
+</div>
+</div>
+<footer><span class="en">OFFAPS internal concept · based on June 2026 research notes · figures sourced therein</span><span class="fa">سند داخلی پروژهٔ OFFAPS · مبتنی بر گزارش‌های تحقیق ژوئن ۲۰۲۶</span><span class="ar">وثيقة مفهوم داخلية لـ OFFAPS · مبنية على ملاحظات بحثية يونيو ٢٠٢٦</span><br/><span style="color:#aebccf">پژوهش و طراحی: <b style="color:#cdd8e6">علی مرادی</b> · Research &amp; design: Ali Moradi</span></footer>
+
+<script>
+const C={blue:'#4a90e2',amber:'#fb923c',purple:'#a855f7',green:'#33c46a',cyan:'#34d8ee'};
+let LANG='en';
+function T(o){return (o&&o[LANG]!==undefined)?o[LANG]:(o?o.en:'');}
+const UI={
+ does:{en:'What it does',fa:'چه می‌کند',ar:'ماذا يفعل'},
+ inputs:{en:'Inputs',fa:'ورودی‌ها',ar:'المدخلات'},
+ outputs:{en:'Outputs',fa:'خروجی‌ها',ar:'المخرجات'},
+ gap:{en:'Gap',fa:'شکاف',ar:'الفجوة'},
+ rel:{en:'Relation to OFFAPS',fa:'نسبت با OFFAPS',ar:'العلاقة بـ OFFAPS'},
+ adds:{en:'What it adds to the cycle',fa:'آنچه به چرخه اضافه می‌کند',ar:'ما يضيفه إلى الدورة'},
+ access:{en:'Direct links',fa:'دسترسی مستقیم',ar:'روابط مباشرة'},
+ hint:{en:'👈 To start, click the green <b>OFFAPS</b> node at the bottom to see which systems feed it and what it adds to the cycle.',fa:'👈 برای شروع، روی گرهٔ سبز <b>OFFAPS</b> در پایین کلیک کنید تا ببینید از کدام سامانه‌ها تغذیه می‌کند و چه چیزی به چرخه اضافه می‌کند.',ar:'👈 للبدء، انقر على عقدة <b>OFFAPS</b> الخضراء في الأسفل لترى الأنظمة التي تغذّيها وما تضيفه إلى الدورة.'}
+};
+const LANES={
+ lane0:{en:'Layer 0 — Monitoring & data',fa:'لایهٔ ۰ — پایش و داده',ar:'الطبقة ٠ — الرصد والبيانات'},
+ lane1:{en:'Layer 1 — Forecasting',fa:'لایهٔ ۱ — پیش‌بینی',ar:'الطبقة ١ — التنبؤ'},
+ lane2:{en:'Layer 2 — Assessment & maps',fa:'لایهٔ ۲ — ارزیابی و نقشه',ar:'الطبقة ٢ — التقييم والخرائط'},
+ lane3:{en:'Layer 3 — Warning & decision',fa:'لایهٔ ۳ — هشدار و تصمیم',ar:'الطبقة ٣ — الإنذار والقرار'}
+};
+const GAPT={en:'Gap zone: translating warning into local impact & decision — unowned',fa:'منطقهٔ شکاف: ترجمهٔ هشدار به اثر و تصمیمِ مکانی — متولی ندارد',ar:'منطقة الفجوة: ترجمة الإنذار إلى أثر وقرار محلي — بلا جهة مسؤولة'};
+const NODES={
+ muzn:{x:920,y:60,w:225,h:78,c:C.blue,lines:{en:['"Muzn" Monitoring Network','83 stations · radars · marine buoys','1500-core HPC · nowcast rainfall'],fa:['شبکهٔ پایش «مُزن»','۸۳ ایستگاه · رادارها · ایستگاه دریایی','ابررایانهٔ ۱۵۰۰واحدی · تحلیل لحظه‌ای بارش'],ar:['شبكة الرصد «مُزن»','٨٣ محطة · رادارات · عوّامات بحرية','حوسبة فائقة ١٥٠٠ نواة · رصد آني للمطر']}},
+ opendata:{x:920,y:165,w:225,h:78,c:C.purple,lines:{en:['Global open data','IMERG · GSMaP · Sentinel-1/2','ERA5 · HydroBASINS/ATLAS · DEM'],fa:['داده‌های آزاد جهانی','IMERG · GSMaP · Sentinel-1/2','ERA5 · HydroBASINS/ATLAS · DEM'],ar:['بيانات عالمية مفتوحة','IMERG · GSMaP · Sentinel-1/2','ERA5 · HydroBASINS/ATLAS · DEM']}},
+ cyc:{x:920,y:270,w:225,h:64,c:C.purple,lines:{en:['Global cyclone tracking','GDACS · JTWC · WMO centers'],fa:['دیده‌بانی سایکلون جهانی','GDACS · JTWC · مراکز WMO'],ar:['تتبّع الأعاصير العالمي','GDACS · JTWC · مراكز WMO']}},
+ nwp:{x:635,y:60,w:225,h:78,c:C.blue,lines:{en:['DGMET numerical models','COSMO 2.8/7km → ICON','+ Arabian-Sea cyclone tracking'],fa:['مدل‌های عددی DGMET','COSMO 2.8/7km ← ICON','+ ردیابی سایکلون دریای عرب'],ar:['نماذج DGMET العددية','COSMO 2.8/7km ← ICON','+ تتبّع أعاصير بحر العرب']}},
+ aiglobal:{x:635,y:165,w:225,h:78,c:C.purple,lines:{en:['Global AI flood models','Flood Hub · GloFAS · AIFS','⚠ weaker in arid wadis'],fa:['مدل‌های جهانی AI','Google Flood Hub · GloFAS · AIFS','⚠ ضعف مستند در وادی‌های خشک'],ar:['نماذج فيضان عالمية بالذكاء الاصطناعي','Flood Hub · GloFAS · AIFS','⚠ أضعف في الأودية الجافة']}},
+ ffgs:{x:345,y:60,w:235,h:72,c:C.blue,lines:{en:['OmanFFGS (since ~2013)','rainfall-threshold guidance','1–6 h confidence horizon'],fa:['OmanFFGS (از ~۲۰۱۳)','راهنمای آستانهٔ بارش','افق اطمینان ۱–۶ ساعت'],ar:['OmanFFGS (منذ ~٢٠١٣)','إرشاد عتبة المطر','أفق ثقة ١–٦ ساعات']}},
+ index:{x:345,y:158,w:235,h:64,c:C.blue,lines:{en:['Flood Modeling Index (2025)','real-time "prone areas" map'],fa:['شاخص مدل‌سازی سیلاب (۲۰۲۵)','نقشهٔ بلادرنگ «مناطق مستعد»'],ar:['مؤشّر نمذجة الفيضانات (٢٠٢٥)','خريطة آنية «للمناطق المعرّضة»']}},
+ maps:{x:345,y:248,w:235,h:78,c:C.amber,lines:{en:['Static maps — MAFWR','Renardet + HR Wallingford','IDF · 3-class zoning · emergency'],fa:['نقشه‌های ایستا — MAFWR','Renardet + HR Wallingford','IDF · پهنه‌بندی ۳رده · طرح اضطراری'],ar:['خرائط ساكنة — MAFWR','Renardet + HR Wallingford','IDF · تصنيف ٣ فئات · طوارئ']}},
+ artelia:{x:345,y:352,w:235,h:72,c:C.amber,lines:{en:['Al-Batinah plan — Artelia + IsDB','36 dam sites · channels','$631M infrastructure'],fa:['طرح باطنه — Artelia + IsDB','۳۶ ساختگاه سد · کانال‌ها','۶۳۱ میلیون دلار زیرساخت'],ar:['خطة الباطنة — Artelia + IsDB','٣٦ موقع سد · قنوات','بنية تحتية ٦٣١ مليون دولار']}},
+ nmhewc:{x:48,y:60,w:215,h:78,c:C.blue,lines:{en:["Nat'l Warning Center (NMHEWC)",'bulletins · app · media','forecaster in the loop'],fa:['مرکز ملی هشدار (NMHEWC)','بولتن‌ها · اپ · رسانه','پیش‌بینِ انسان در حلقه'],ar:['المركز الوطني للإنذار (NMHEWC)','نشرات · تطبيق · إعلام','مُتنبّئ بشري ضمن الحلقة']}},
+ ncem:{x:48,y:165,w:215,h:64,c:C.blue,lines:{en:["Nat'l Emergency Committee (NCEM)",'risk register · response'],fa:['کمیتهٔ ملی بحران (NCEM)','سجل مخاطرات · پاسخ اضطراری'],ar:['اللجنة الوطنية للطوارئ (NCEM)','سجل المخاطر · الاستجابة']}},
+ offaps:{x:120,y:585,w:700,h:74,c:C.green,big:true,lines:{en:['OFFAPS — impact-intelligence layer (proposed · sovereign)','Multi-day cyclone scenario → AI sub-basin risk → exposure/crossings → trilingual WebGIS + CAP → verification'],fa:['OFFAPS — لایهٔ هوش اثرمحور (پیشنهادی · استقرار حاکمیتی)','سناریوی سایکلون‌محور چندروزه ← ریسک زیرحوضه‌ای AI ← مواجهه (جمعیت/سازه/گذرگاه) ← WebGIS سه‌زبانه + CAP ← راستی‌آزمایی'],ar:['OFFAPS — طبقة ذكاء الأثر (مقترح · سيادي)','سيناريو إعصار متعدد الأيام ← مخاطر أحواض بالذكاء الاصطناعي ← التعرّض/المعابر ← WebGIS ثلاثي اللغات + CAP ← تحقّق']}}
+};
+const LINKS={
+ muzn:[{u:'https://met.caa.gov.om/en/home/',e:'🌐',t:'DGMET official site'}],
+ opendata:[{u:'https://gpm.nasa.gov/data/imerg',e:'🛰',t:'NASA GPM IMERG'},{u:'https://browser.dataspace.copernicus.eu/',e:'🛰',t:'Copernicus / Sentinel'},{u:'https://www.hydrosheds.org/',e:'🌐',t:'HydroSHEDS / HydroBASINS'}],
+ cyc:[{u:'https://www.gdacs.org/',e:'🌀',t:'GDACS — active events'},{u:'https://www.metoc.navy.mil/jtwc/jtwc.html',e:'🌀',t:'JTWC'}],
+ nwp:[{u:'https://met.caa.gov.om/en/warnings/',e:'🌐',t:'DGMET warnings'}],
+ aiglobal:[{u:'https://sites.research.google/floods/',e:'🌐',t:'Google Flood Hub'},{u:'https://global-flood.emergency.copernicus.eu/',e:'🌐',t:'Copernicus GloFAS'}],
+ ffgs:[{u:'https://www.hrcwater.org/projects/oman-flash-flood-guidance-system/',e:'🌐',t:'HRC project page'},{u:'https://wmo.int/projects/ffgs',e:'🌐',t:'WMO FFGS'}],
+ index:[{u:'https://www.omanobserver.om/article/1187231/oman/weather/omans-early-warning-centre-helps-in-mitigating-potential-risks',e:'📄',t:'Oman Observer'}],
+ maps:[{u:'https://www.muscatdaily.com/2025/02/03/oman-unveils-2-year-plan-to-mitigate-flood-risks/',e:'📄',t:'Muscat Daily'},{u:'https://www.hrwallingford.com/',e:'🌐',t:'HR Wallingford'}],
+ artelia:[{u:'https://www.arteliagroup.com/project/protecting-the-sultanate-of-oman-from-floods/',e:'🌐',t:'Artelia — Batinah project'},{u:'https://www.isdb.org/',e:'🌐',t:'IsDB'}],
+ nmhewc:[{u:'https://met.caa.gov.om/en/home/',e:'🌐',t:'Oman meteorology / warnings'}],
+ ncem:[{u:'https://x.com/NCEMOMAN',e:'📄',t:'NCEM channel'}],
+ offaps:[{u:'webgis.html',e:'🖥',t:'Live WebGIS demo'}]
+};
+const EDGES=[['muzn','nwp'],['muzn','ffgs'],['muzn','index'],['opendata','aiglobal'],['opendata','maps'],['cyc','nwp'],['nwp','ffgs'],['nwp','index'],['nwp','nmhewc'],['ffgs','nmhewc'],['index','ncem'],['maps','ncem'],['artelia','maps'],['muzn','offaps'],['opendata','offaps'],['cyc','offaps'],['nwp','offaps'],['aiglobal','offaps'],['ffgs','offaps'],['index','offaps'],['maps','offaps'],['artelia','offaps'],['offaps','nmhewc'],['offaps','ncem']];
+const D={
+ muzn:{t:{en:'"Muzn" Program — monitoring network',fa:'برنامهٔ مُزن — شبکهٔ پایش',ar:'برنامج «مُزن» — شبكة الرصد'},o:{en:'Civil Aviation Authority (CAA) · 2023–2026',fa:'سازمان هواپیمایی کشوری (CAA) · ۲۰۲۳–۲۰۲۶',ar:'هيئة الطيران المدني (CAA) · ٢٠٢٣–٢٠٢٦'},s:{en:'Active / expanding',fa:'فعال/در توسعه',ar:'فعّال/قيد التوسّع'},sc:'#4a90e2',
+  does:{en:'Monitoring backbone: 83 surface stations, radar renewal (incl. Musandam), marine wave/current stations, a 1500-core HPC and a "nowcast rainfall analysis" system.',fa:'ستون فقرات دیده‌بانی: ۸۳ ایستگاه سطحی، نوسازی رادارها (تکمیل با مسندم)، ایستگاه‌های موج/جریان دریایی، ابررایانهٔ ۱۵۰۰+ واحدی و «سامانهٔ تحلیل لحظه‌ای بارش».',ar:'العمود الفقري للرصد: ٨٣ محطة سطحية، وتجديد الرادارات (مع مسندم)، ومحطات أمواج/تيارات بحرية، وحوسبة فائقة ١٥٠٠+ نواة، و«نظام تحليل آني للمطر».'},
+  i:{en:['ground/marine sensors','radar','satellite'],fa:['حسگرهای زمینی/دریایی','رادار','ماهواره'],ar:['مستشعرات أرضية/بحرية','رادار','أقمار صناعية']},
+  ou:{en:['real-time monitoring data','feeds numerical models & FFGS'],fa:['دادهٔ دیده‌بانی بلادرنگ','ورودی مدل‌های عددی و FFGS'],ar:['بيانات رصد آنية','تغذية النماذج العددية وFFGS']},
+  gap:{en:'Produces "data" only; impact interpretation is left to later layers.',fa:'فقط «داده» تولید می‌کند؛ تفسیر اثر بر عهدهٔ لایه‌های بعدی است.',ar:'يُنتج «بيانات» فقط؛ وتفسير الأثر متروك للطبقات اللاحقة.'},
+  off:{en:'A direct consumer of this data — refining event rainfall and verification.',fa:'OFFAPS مشتری مستقیم این داده‌هاست — تدقیق بارش رویداد و راستی‌آزمایی.',ar:'مستهلك مباشر لهذه البيانات — لتدقيق أمطار الحدث والتحقّق.'}},
+ opendata:{t:{en:'Global open data',fa:'داده‌های آزاد جهانی',ar:'بيانات عالمية مفتوحة'},o:{en:'NASA/JAXA/ESA/ECMWF — no agreement needed',fa:'NASA/JAXA/ESA/ECMWF — بدون نیاز به توافق',ar:'NASA/JAXA/ESA/ECMWF — دون اتفاقات'},s:{en:'Always available',fa:'همیشه در دسترس',ar:'متاح دائماً'},sc:'#a855f7',
+  does:{en:'30-min satellite rainfall, SAR radar (flood extent through cloud), climate reanalysis, basin topology.',fa:'بارش ماهواره‌ای ۳۰دقیقه‌ای، رادار SAR (پهنهٔ سیل از پشت ابر)، بازتحلیل اقلیمی، توپولوژی حوضه‌ها.',ar:'أمطار فضائية كل ٣٠ دقيقة، رادار SAR (نطاق الفيضان عبر الغيوم)، إعادة تحليل مناخي، طوبولوجيا الأحواض.'},
+  i:{en:['—'],fa:['—'],ar:['—']},
+  ou:{en:['IMERG/GSMaP','Sentinel-1/2','ERA5-Land','HydroBASINS/ATLAS'],fa:['IMERG/GSMaP','Sentinel-1/2','ERA5-Land','HydroBASINS/ATLAS'],ar:['IMERG/GSMaP','Sentinel-1/2','ERA5-Land','HydroBASINS/ATLAS']},
+  gap:{en:'Raw; without a local engine it is not decision-ready.',fa:'خام‌اند؛ بدون موتور محلی، تصمیم‌ساز نیستند.',ar:'خام؛ ودون محرّك محلي ليست جاهزة للقرار.'},
+  off:{en:'Backbone of OFFAPS Phase 1 — independence from national agreements at the start.',fa:'ستون فقرات فاز ۱ OFFAPS — استقلال از توافق‌های ملی در شروع.',ar:'العمود الفقري للمرحلة ١ — استقلالية عن الاتفاقات الوطنية في البداية.'}},
+ cyc:{t:{en:'Global cyclone tracking',fa:'دیده‌بانی سایکلون جهانی',ar:'تتبّع الأعاصير العالمي'},o:{en:'GDACS (UN/EU), JTWC, WMO centers',fa:'GDACS (سازمان ملل/EU)، JTWC، مراکز WMO',ar:'GDACS (الأمم المتحدة/الاتحاد الأوروبي)، JTWC، مراكز WMO'},s:{en:'Active',fa:'فعال',ar:'فعّال'},sc:'#a855f7',
+  does:{en:'Publishes track, intensity and the uncertainty cone of Arabian-Sea cyclones, days ahead.',fa:'مسیر، شدت و مخروط عدم‌قطعیت سایکلون‌های دریای عرب را روزها جلوتر منتشر می‌کند.',ar:'ينشر مسار وشدّة ومخروط عدم يقين أعاصير بحر العرب، قبل أيام.'},
+  i:{en:['satellite','global models'],fa:['ماهواره','مدل‌های جهانی'],ar:['أقمار صناعية','نماذج عالمية']},
+  ou:{en:['real-time track/cone','active-event alerts'],fa:['Track/Cone بلادرنگ','هشدار رویداد فعال'],ar:['مسار/مخروط آني','تنبيهات الأحداث النشطة']},
+  gap:{en:'Says where the storm goes, not what it does to each wadi.',fa:'می‌گوید توفان کجا می‌رود؛ نمی‌گوید روی کدام وادی چه می‌کند.',ar:'يقول إلى أين تذهب العاصفة، لا ماذا تفعل بكل وادٍ.'},
+  off:{en:'The trigger for the OFFAPS scenario engine — source of the multi-day horizon.',fa:'محرک «سناریوساز» OFFAPS — منشأ افق چندروزهٔ هشدار.',ar:'مُحفّز محرّك السيناريو في OFFAPS — مصدر الأفق متعدد الأيام.'}},
+ nwp:{t:{en:'DGMET numerical forecast & cyclone tracking',fa:'پیش‌بینی عددی و ردیابی سایکلون DGMET',ar:'التنبؤ العددي وتتبّع الأعاصير — DGMET'},o:{en:'Directorate General of Meteorology (CAA)',fa:'ادارهٔ کل هواشناسی (CAA)',ar:'المديرية العامة للأرصاد (CAA)'},s:{en:'Active',fa:'فعال',ar:'فعّال'},sc:'#4a90e2',
+  does:{en:'Regional COSMO at 2.8/7km (moving to ICON) plus upgraded cyclone tracking. The main feed for forecasters.',fa:'مدل منطقه‌ای COSMO با تفکیک ۲٫۸/۷km (در گذار به ICON) + ظرفیت ارتقایافتهٔ ردیابی سایکلون. خوراک اصلی پیش‌بین‌ها.',ar:'نموذج COSMO الإقليمي بدقة ٢٫٨/٧كم (انتقال إلى ICON) مع تتبّع أعاصير محسّن. التغذية الرئيسية للمتنبّئين.'},
+  i:{en:['Muzn data','global boundary conditions'],fa:['دادهٔ مُزن','شرایط مرزی جهانی'],ar:['بيانات مُزن','شروط حدّية عالمية']},
+  ou:{en:['forecast rain/wind fields','cyclone-track map','feeds the 2025 Index'],fa:['میدان بارش/باد پیش‌بینی','نقشهٔ مسیر سایکلون','ورودی شاخص ۲۰۲۵'],ar:['حقول مطر/رياح متوقّعة','خريطة مسار الإعصار','تغذية مؤشّر ٢٠٢٥']},
+  gap:{en:'Output is "meteorological," not hydrological — gives rainfall, not flood and its impact.',fa:'خروجی «جوّی» است نه هیدرولوژیک — بارش را می‌دهد، سیلاب و اثرش را نه.',ar:'المخرجات «جوية» لا هيدرولوجية — تعطي المطر، لا الفيضان وأثره.'},
+  off:{en:'One of OFFAPS’s L1 inputs; our model translates it into a sub-basin response.',fa:'یکی از ورودی‌های L1 در OFFAPS؛ مدل ما آن را به پاسخ زیرحوضه ترجمه می‌کند.',ar:'أحد مدخلات الطبقة ١ في OFFAPS؛ نموذجنا يترجمه إلى استجابة على مستوى الحوض.'}},
+ aiglobal:{t:{en:'Global AI flood models',fa:'مدل‌های جهانی AI سیلاب',ar:'نماذج الفيضان العالمية بالذكاء الاصطناعي'},o:{en:'Google (Flood Hub) · Copernicus (GloFAS) · ECMWF-AIFS',fa:'Google (Flood Hub) · Copernicus (GloFAS) · ECMWF-AIFS',ar:'Google (Flood Hub) · Copernicus (GloFAS) · ECMWF-AIFS'},s:{en:'Active — limited coverage',fa:'فعال — پوشش محدود',ar:'فعّال — تغطية محدودة'},sc:'#a855f7',
+  does:{en:'7-day discharge prediction even in ungauged basins (Nature 2024).',fa:'پیش‌بینی دبی ۷روزه حتی در حوضه‌های بدون ایستگاه (Nature 2024).',ar:'تنبؤ بالتصريف لـ٧ أيام حتى في الأحواض غير المرصودة (Nature 2024).'},
+  i:{en:['IMERG/ERA5/HRES','HydroATLAS'],fa:['IMERG/ERA5/HRES','HydroATLAS'],ar:['IMERG/ERA5/HRES','HydroATLAS']},
+  ou:{en:['point discharge + alert','open model weights (Zenodo)'],fa:['دبی نقطه‌ای + هشدار','وزن‌های باز مدل (Zenodo)'],ar:['تصريف نقطي + تنبيه','أوزان نموذج مفتوحة (Zenodo)']},
+  gap:{en:'The paper itself notes it is weaker in flashy arid basins, and the output is discharge only — not extent/impact/exposure.',fa:'به اذعان خود مقاله، در حوضه‌های خشکِ تیزپاسخ ضعیف‌تر است و خروجی فقط دبی است، نه پهنه/اثر/مواجهه.',ar:'تذكر الورقة نفسها أنه أضعف في الأحواض الجافة سريعة الاستجابة، والمخرجات تصريف فقط — لا نطاق/أثر/تعرّض.'},
+  off:{en:'A starting point for local fine-tuning (transfer learning on company compute) — not a rival, a raw material.',fa:'نقطهٔ شروع فاین‌تیون بومی OFFAPS (یادگیری انتقالی روی زیرساخت پردازشی شرکت) — نه رقیب، مادهٔ اولیه.',ar:'نقطة انطلاق للضبط المحلي (تعلّم انتقالي على حوسبة الشركة) — ليس منافساً بل مادة خام.'}},
+ ffgs:{t:{en:'OmanFFGS — flash-flood guidance',fa:'OmanFFGS — سامانهٔ راهنمای سیلاب ناگهانی',ar:'OmanFFGS — نظام إرشاد الفيضانات المفاجئة'},o:{en:'Built by HRC (USA) · hosted by DGMET · since ~2013',fa:'ساخت HRC آمریکا · میزبانی DGMET · از ~۲۰۱۳',ar:'بناء HRC (أمريكا) · استضافة DGMET · منذ ~٢٠١٣'},s:{en:'Active — documented limits',fa:'فعال — با محدودیت‌های مستند',ar:'فعّال — قيود موثّقة'},sc:'#4a90e2',
+  does:{en:'Per basin, computes how much rainfall in the coming hours would be flood-triggering (soil-saturation model) and compares with observed/forecast rain.',fa:'برای هر حوضه محاسبه می‌کند چند میلی‌متر بارش در ساعات آینده سیلاب‌زاست (مدل اشباع خاک) و با بارش دیده‌بانی/پیش‌بینی مقایسه می‌کند.',ar:'يحسب لكل حوض كمية المطر في الساعات القادمة التي تُسبّب الفيضان (نموذج تشبّع التربة) ويقارنها بالمطر المرصود/المتوقّع.'},
+  i:{en:['radar (priority — often offline)','satellite','rain gauges','COSMO/ICON'],fa:['رادار (اولویت ۱ — اغلب خارج از سرویس)','ماهواره','باران‌سنج','COSMO/ICON'],ar:['رادار (أولوية — غالباً معطّل)','أقمار صناعية','مقاييس مطر','COSMO/ICON']},
+  ou:{en:['hourly guidance (text/image/CSV)','for forecasters, not the public'],fa:['راهنمای ساعتی (متن/تصویر/CSV)','برای پیش‌بین، نه عموم'],ar:['إرشاد ساعي (نص/صورة/CSV)','للمتنبّئين لا للعامة']},
+  gap:{en:'1–6 h horizon · no extent/depth/impact map · no interactive wadi map (an explicit user request) · never verified.',fa:'افق اطمینان ۱–۶ ساعت · بدون نقشهٔ پهنه/عمق/اثر · بدون نقشهٔ تعاملی وادی‌ها (درخواست صریح کاربران) · هرگز راستی‌آزمایی نشده.',ar:'أفق ١–٦ ساعات · بلا خريطة نطاق/عمق/أثر · بلا خريطة أودية تفاعلية (طلب صريح للمستخدمين) · لم يُتحقّق منه قطّ.'},
+  off:{en:'OFFAPS complements it: FFGS guidance becomes one input to the impact engine, closing the four gaps above.',fa:'OFFAPS مکمل آن است: راهنمای FFGS یکی از ورودی‌های موتور اثر می‌شود و چهار شکاف بالا را می‌بندد.',ar:'يُكمّله OFFAPS: يصبح إرشاد FFGS أحد مدخلات محرّك الأثر، فيسدّ الفجوات الأربع أعلاه.'}},
+ index:{t:{en:'Flood Modeling Index (2025)',fa:'شاخص مدل‌سازی سیلاب (۲۰۲۵)',ar:'مؤشّر نمذجة الفيضانات (٢٠٢٥)'},o:{en:'DGMET — flagship 2025 project (per the DG)',fa:'DGMET — برجسته‌ترین پروژهٔ ۲۰۲۵ به گفتهٔ مدیرکل',ar:'DGMET — أبرز مشروع ٢٠٢٥ (بحسب المدير العام)'},s:{en:'Active — details unpublished',fa:'فعال — جزئیات منتشرنشده',ar:'فعّال — التفاصيل غير منشورة'},sc:'#4a90e2',
+  does:{en:'"Real-time forecast of areas prone to heavy-rain flooding" (the only official description). Likely: fusion of nowcast rainfall + numerical model + threshold logic on the HPC.',fa:'«پیش‌بینی بلادرنگ مناطق مستعد سیلاب ناشی از بارش شدید» (تنها توصیف رسمی). استنباط: هم‌جوشی تحلیل لحظه‌ای بارش + مدل عددی + منطق آستانه‌ای روی ابررایانه.',ar:'«تنبؤ آني بالمناطق المعرّضة لفيضان الأمطار الغزيرة» (الوصف الرسمي الوحيد). الأرجح: دمج رصد آني للمطر + نموذج عددي + منطق عتبة على الحوسبة الفائقة.'},
+  i:{en:['nowcast rainfall','COSMO/ICON','saturation model (FFGS-like)'],fa:['تحلیل لحظه‌ای بارش','COSMO/ICON','مدل اشباع (FFGS-گونه)'],ar:['رصد آني للمطر','COSMO/ICON','نموذج تشبّع (شبيه FFGS)']},
+  ou:{en:['next-hours prone-area map','"flood-probability models" for NCEM'],fa:['نقشهٔ استعداد سیلاب ساعات آینده','«مدل‌های احتمالات سیلاب» برای NCEM'],ar:['خريطة المناطق المعرّضة للساعات القادمة','«نماذج احتمالات الفيضان» لـ NCEM']},
+  gap:{en:'No AI (the CAA itself calls it a "future direction"), no cyclone-driven scenario, no sub-basin/exposure/public WebGIS/verification.',fa:'بدون AI (به اذعان خود CAA «جهت‌گیری آینده» است)، بدون سایکلون‌محوری، بدون زیرحوضه/مواجهه/WebGIS عمومی/راستی‌آزمایی.',ar:'بلا ذكاء اصطناعي (تسمّيه CAA «توجّهاً مستقبلياً»)، بلا سيناريو إعصاري، بلا أحواض/تعرّض/WebGIS عام/تحقّق.'},
+  off:{en:'OFFAPS consumes it as a spatial pre-filter and starts where it ends.',fa:'OFFAPS آن را به‌عنوان پیش‌فیلتر مکانی مصرف می‌کند و از همان‌جا که تمام می‌شود آغاز می‌کند.',ar:'يستهلكه OFFAPS كمرشّح مكاني مبدئي ويبدأ من حيث ينتهي.'}},
+ maps:{t:{en:'Flood-hazard map update project',fa:'پروژهٔ به‌روزرسانی نقشه‌های خطر سیلاب',ar:'مشروع تحديث خرائط مخاطر الفيضان'},o:{en:'Owner: MAFWR · Consultant: Renardet + HR Wallingford · 2024–2026',fa:'صاحب پروژه: MAFWR · مشاور: Renardet + HR Wallingford · ۲۰۲۴–۲۰۲۶',ar:'صاحب المشروع: MAFWR · الاستشاري: Renardet + HR Wallingford · ٢٠٢٤–٢٠٢٦'},s:{en:'Underway — pkg 1: ~54%',fa:'در حال اجرا — بستهٔ ۱: ~۵۴٪',ar:'جارٍ — الحزمة ١: ~٥٤٪'},sc:'#fb923c',
+  does:{en:'Three phases: rainfall-runoff & per-governorate IDF → hydraulic modelling and 3-class zoning (depth/velocity/direction) → emergency plans & channel buffers. (45% of Muscat exposed to wadi flooding, 20% coastal.)',fa:'سه فاز: تحلیل بارش-رواناب و IDF هر استان ← مدل‌سازی هیدرولیکی و پهنه‌بندی سه‌رده (با عمق/سرعت/جهت) ← طرح‌های اضطراری و حریم مجاری. (۴۵٪ مسقط در معرض سیلاب وادی، ۲۰٪ ساحلی)',ar:'ثلاث مراحل: مطر-جريان وIDF لكل محافظة ← نمذجة هيدروليكية وتصنيف ٣ فئات (عمق/سرعة/اتجاه) ← خطط طوارئ وحُرُم المجاري. (٤٥٪ من مسقط معرّضة لفيضان الأودية، ٢٠٪ ساحلية)'},
+  i:{en:['historical rain/flow stats','DEM','land use'],fa:['آمار بارش/دبی تاریخی','DEM','کاربری اراضی'],ar:['إحصاءات مطر/تصريف تاريخية','DEM','استخدام الأراضي']},
+  ou:{en:['static hazard/risk maps','per-governorate IDF','emergency plans for NCEM & municipalities'],fa:['نقشه‌های خطر/ریسک ایستا','IDF استانی','طرح اضطراری برای NCEM و شهرداری‌ها'],ar:['خرائط مخاطر/خطر ساكنة','IDF لكل محافظة','خطط طوارئ لـ NCEM والبلديات']},
+  gap:{en:'Static and return-period — does not answer "what happens now," with no automatic updating.',fa:'ایستا و دوره‌بازگشتی است — «الان چه می‌شود؟» را پاسخ نمی‌دهد و بهنگام‌سازی خودکار ندارد.',ar:'ساكنة وبفترات عودة — لا تُجيب «ماذا يحدث الآن»، وبلا تحديث آلي.'},
+  off:{en:'A gift to OFFAPS: ready static layer + local IDF to train the model. The dynamic layer rides on top.',fa:'هدیه به OFFAPS: لایهٔ ایستای آماده + IDF بومی برای آموزش مدل. لایهٔ پویا روی همین سوار می‌شود.',ar:'هدية لـ OFFAPS: طبقة ساكنة جاهزة + IDF محلي لتدريب النموذج. وتركب الطبقة الديناميكية فوقها.'}},
+ artelia:{t:{en:'Al-Batinah protection master plan + IsDB finance',fa:'طرح جامع حفاظت باطنه + تأمین مالی IsDB',ar:'الخطة الشاملة لحماية الباطنة + تمويل IsDB'},o:{en:'Artelia consortium (France) · $631M IsDB loan',fa:'کنسرسیوم Artelia (فرانسه) · وام ۶۳۱M$ بانک توسعهٔ اسلامی',ar:'تحالف Artelia (فرنسا) · قرض ٦٣١ مليون دولار من IsDB'},s:{en:'Underway',fa:'در حال اجرا',ar:'جارٍ'},sc:'#fb923c',
+  does:{en:'Feasibility of 36 dam sites, detailed design of 15 priorities, evacuation channels and coastal drainage + mapping of flood-prone areas — exactly in the OFFAPS pilot region.',fa:'امکان‌سنجی ۳۶ ساختگاه سد، طراحی تفصیلی ۱۵ اولویت، کانال‌های تخلیه و شبکهٔ زهکشی ساحلی + نقشه‌برداری پهنه‌های سیل‌خیز — دقیقاً در منطقهٔ پایلوت OFFAPS.',ar:'جدوى ٣٦ موقع سد، وتصميم تفصيلي لـ١٥ أولوية، وقنوات تصريف وشبكة صرف ساحلية + رسم المناطق المعرّضة — تماماً في منطقة تجربة OFFAPS.'},
+  i:{en:['Batinah topography/hydrology','risk modelling'],fa:['توپوگرافی/هیدرولوژی باطنه','مدل‌سازی ریسک'],ar:['طوبوغرافيا/هيدرولوجيا الباطنة','نمذجة المخاطر']},
+  ou:{en:['dam & channel designs','static Batinah risk map','protecting 670k+ people'],fa:['طرح سدها و کانال‌ها','نقشهٔ ایستای ریسک باطنه','حفاظت ۶۷۰هزار+ نفر'],ar:['تصاميم سدود وقنوات','خريطة مخاطر ساكنة للباطنة','حماية ٦٧٠ ألف+ شخص']},
+  gap:{en:'Hardware without a real-time brain: it builds dams but, on the event day, cannot say "which crossing to close."',fa:'سخت‌افزار بدون مغز بلادرنگ: سد می‌سازد، اما روز رویداد «کدام گذرگاه بسته شود» را نمی‌گوید.',ar:'بنية تحتية بلا عقل آني: تبني السدود لكنها لا تقول يوم الحدث «أيّ معبر يُغلق».'},
+  off:{en:'The OFFAPS "with/without dams" module shows the effect of these dams on the live risk map — multiplying the investment’s value.',fa:'ماژول «با/بدون سد» OFFAPS اثر همین سدها را روی نقشهٔ ریسک زنده نشان می‌دهد — ارزش سرمایه‌گذاری را چندبرابر می‌کند.',ar:'وحدة «بسدود/بدونها» في OFFAPS تُظهر أثر هذه السدود على خريطة الخطر الحية — فتُضاعف قيمة الاستثمار.'}},
+ nmhewc:{t:{en:'National Multi-Hazard Early-Warning Center',fa:'مرکز ملی هشدار زودهنگام چندمخاطره‌ای',ar:'المركز الوطني للإنذار المبكر من المخاطر المتعددة'},o:{en:'DGMET/CAA · est. 2015 · 24/7',fa:'DGMET/CAA · تأسیس ۲۰۱۵ · ۲۴/۷',ar:'DGMET/CAA · تأسّس ٢٠١٥ · ٢٤/٧'},s:{en:'Active',fa:'فعال',ar:'فعّال'},sc:'#4a90e2',
+  does:{en:'Three components: tsunami, cyclone, flash flood. In 2025: 2,850 special bulletins and thousands of forecasts. Warnings via web/app/media with a forecaster’s sign-off.',fa:'سه جزء: سونامی، سایکلون، سیلاب ناگهانی. در ۲۰۲۵: ۲٬۸۵۰ بولتن ویژه و هزاران پیش‌بینی. هشدار از طریق وب/اپ/رسانه با تأیید پیش‌بینِ انسانی.',ar:'ثلاثة مكوّنات: تسونامي، إعصار، فيضان مفاجئ. في ٢٠٢٥: ٢٬٨٥٠ نشرة خاصة وآلاف التنبؤات. إنذارات عبر الويب/التطبيق/الإعلام بمصادقة متنبّئ.'},
+  i:{en:['FFGS','2025 Index','numerical models','radar/satellite'],fa:['FFGS','شاخص ۲۰۲۵','مدل‌های عددی','رادار/ماهواره'],ar:['FFGS','مؤشّر ٢٠٢٥','نماذج عددية','رادار/أقمار']},
+  ou:{en:['public bulletins & alerts','aviation/marine warnings'],fa:['بولتن و هشدار عمومی','هشدار هوانوردی/دریایی'],ar:['نشرات وتنبيهات عامة','إنذارات طيران/بحرية']},
+  gap:{en:'Warnings are "governorate/general"; March 2026 showed they do not translate into point decisions (wadi crossings) — and the deaths were at crossings.',fa:'هشدار «استانی/عمومی» است؛ مارس ۲۰۲۶ نشان داد به تصمیم نقطه‌ای (گذرگاه وادی) ترجمه نمی‌شود — و کشته‌ها در گذرگاه‌ها بودند.',ar:'الإنذارات «على مستوى المحافظة/عامة»؛ وأظهر مارس ٢٠٢٦ أنها لا تُترجَم إلى قرارات نقطية (معابر الأودية) — والوفيات كانت عند المعابر.'},
+  off:{en:'OFFAPS is not the warning authority; it gives this Center a CAP feed and an impact map so its warning becomes targeted.',fa:'OFFAPS مرجع هشدار نمی‌شود؛ فید CAP و نقشهٔ اثر را به همین مرکز می‌دهد تا هشدارش هدفمند شود.',ar:'OFFAPS ليس جهة الإنذار؛ بل يمنح هذا المركز تغذية CAP وخريطة أثر ليصبح إنذاره موجّهاً.'}},
+ ncem:{t:{en:'National Emergency Management Committee',fa:'کمیتهٔ ملی مدیریت شرایط اضطراری',ar:'اللجنة الوطنية لإدارة الطوارئ'},o:{en:'NCEM — national response command',fa:'NCEM — فرماندهی پاسخ ملی',ar:'NCEM — قيادة الاستجابة الوطنية'},s:{en:'Active',fa:'فعال',ar:'فعّال'},sc:'#4a90e2',
+  does:{en:'National risk register, inter-agency coordination, response decisions (evacuation, closures, relief).',fa:'سجل مخاطرات ملی، هماهنگی دستگاه‌ها، تصمیم‌های پاسخ (تخلیه، تعطیلی، امداد).',ar:'سجل المخاطر الوطني، تنسيق بين الجهات، قرارات الاستجابة (إخلاء، إغلاق، إغاثة).'},
+  i:{en:['warnings from the Center','CAA "flood-probability models"','MAFWR maps'],fa:['هشدارهای مرکز ملی','«مدل‌های احتمالات سیلاب» CAA','نقشه‌های MAFWR'],ar:['إنذارات المركز','«نماذج احتمالات الفيضان» من CAA','خرائط MAFWR']},
+  ou:{en:['emergency decisions','response operations'],fa:['تصمیم‌های اضطراری','عملیات پاسخ'],ar:['قرارات طوارئ','عمليات استجابة']},
+  gap:{en:'Its inputs are static or general; no real-time prioritization dashboard (which sub-basin, how many, which route open).',fa:'ورودی‌هایش یا ایستاست یا عمومی؛ داشبورد اولویت‌بندی بلادرنگ (کدام زیرحوضه، چند نفر، کدام مسیر باز) ندارد.',ar:'مدخلاتها ساكنة أو عامة؛ بلا لوحة أولويات آنية (أيّ حوض، كم شخصاً، أيّ طريق مفتوح).'},
+  off:{en:'The OFFAPS relief dashboard and closure-decision aid are built precisely for this table.',fa:'داشبورد امداد و تصمیم‌یار تعطیلی OFFAPS مستقیماً برای همین میز ساخته می‌شود.',ar:'لوحة الإغاثة ومساعد قرار الإغلاق في OFFAPS مبنيان تحديداً لهذه الطاولة.'}},
+ offaps:{t:{en:'OFFAPS — impact-intelligence layer (proposed)',fa:'OFFAPS — لایهٔ هوش اثرمحور (پیشنهادی)',ar:'OFFAPS — طبقة ذكاء الأثر (مقترح)'},o:{en:'AI team · sovereign on-prem deployment',fa:'تیم تخصصی هوش مصنوعی · استقرار حاکمیتی on-prem',ar:'فريق ذكاء اصطناعي · نشر سيادي محلي'},s:{en:'Proposed — demo ready',fa:'پیشنهادی — دمو آماده',ar:'مقترح — العرض جاهز'},sc:'#33c46a',
+  does:{en:'Repeats nothing; it ingests every output on this page and closes the three missing steps: (5) real-time sub-basin impact with AI + exposure (population, structures, wadi crossings), (6) targeted decision (trilingual WebGIS, CAP, relief dashboard, closure aid), (7) post-event verification (SAR/drone/LSPIV) feeding back into all models.',fa:'هیچ‌چیز را تکرار نمی‌کند؛ همهٔ خروجی‌های این صفحه را می‌بلعد و سه گام غایب چرخه را کامل می‌کند: (۵) اثر بلادرنگ زیرحوضه‌ای با AI + مواجهه (جمعیت، سازه، گذرگاه‌های وادی)، (۶) تصمیم هدفمند (WebGIS سه‌زبانه، CAP، داشبورد امداد، تصمیم‌یار تعطیلی)، (۷) راستی‌آزمایی پس از هر رویداد (SAR/پهپاد/LSPIV) که به همهٔ مدل‌ها بازخورد می‌دهد.',ar:'لا يكرّر شيئاً؛ يستوعب كل مخرجات هذه الصفحة ويُكمل الخطوات الثلاث المفقودة: (٥) أثر آني للأحواض بالذكاء الاصطناعي + التعرّض (سكان، منشآت، معابر أودية)، (٦) قرار موجّه (WebGIS ثلاثي اللغات، CAP، لوحة إغاثة، مساعد إغلاق)، (٧) تحقّق بعد الحدث (SAR/درون/LSPIV) يُغذّي كل النماذج.'},
+  i:{en:['Muzn + COSMO/ICON','FFGS + 2025 Index','MAFWR maps + Artelia plan','cyclone track + open data + global AI'],fa:['مُزن + COSMO/ICON','FFGS + شاخص ۲۰۲۵','نقشه‌های MAFWR + طرح Artelia','مسیر سایکلون + داده‌های آزاد + مدل‌های جهانی AI'],ar:['مُزن + COSMO/ICON','FFGS + مؤشّر ٢٠٢٥','خرائط MAFWR + خطة Artelia','مسار الإعصار + بيانات مفتوحة + ذكاء اصطناعي عالمي']},
+  ou:{en:['multi-day sub-basin risk map','live wadi-crossing status','exposure profile + NCEM dashboard','CAP feed for the Center','72-h verification report'],fa:['نقشهٔ ریسک زیرحوضه‌ای چندروزه','وضعیت زندهٔ گذرگاه‌های وادی','پروفایل مواجهه + داشبورد NCEM','فید CAP برای مرکز ملی','گزارش راستی‌آزمایی ۷۲ساعته'],ar:['خريطة مخاطر أحواض متعددة الأيام','حالة حية لمعابر الأودية','ملف تعرّض + لوحة NCEM','تغذية CAP للمركز','تقرير تحقّق خلال ٧٢ ساعة']},
+  off:{en:'The five things no existing system has: multi-day cyclone focus · impact AI · exposure · public wadi-level WebGIS · a verification loop.',fa:'پنج مؤلفه‌ای که هیچ سامانهٔ موجودی ندارد: سایکلون‌محوری چندروزه · AI اثر · مواجهه · WebGIS عمومی وادی‌دار · حلقهٔ راستی‌آزمایی.',ar:'الأمور الخمسة التي لا يملكها أيّ نظام قائم: تركيز إعصاري متعدد الأيام · ذكاء أثر · تعرّض · WebGIS عام على مستوى الأودية · حلقة تحقّق.'}}
+};
+const svgns='http://www.w3.org/2000/svg';
+const gN=document.getElementById('nodes'),gE=document.getElementById('edges');
+const edgeEls=[];
+EDGES.forEach(([a,b])=>{
+ const A=NODES[a],B=NODES[b];let p1,p2;
+ if(B.big){p1={x:A.x+A.w/2,y:A.y+A.h};p2={x:Math.min(Math.max(A.x+A.w/2,B.x+30),B.x+B.w-30),y:B.y};}
+ else if(A.big){p1={x:A.x+60,y:A.y};p2={x:B.x+B.w/2,y:B.y+B.h};}
+ else{p1={x:A.x,y:A.y+A.h/2};p2={x:B.x+B.w,y:B.y+B.h/2};}
+ const mx=(p1.x+p2.x)/2;
+ const d=(B.big||A.big)?`M${p1.x},${p1.y} C${p1.x},${(p1.y+p2.y)/2} ${p2.x},${(p1.y+p2.y)/2} ${p2.x},${p2.y}`:`M${p1.x},${p1.y} C${mx},${p1.y} ${mx},${p2.y} ${p2.x},${p2.y}`;
+ const el=document.createElementNS(svgns,'path');el.setAttribute('d',d);el.setAttribute('class','edge');
+ el.setAttribute('stroke',(b==='offaps'||a==='offaps')?'#33c46a':'#5b769e');el.setAttribute('marker-end','url(#ar)');
+ el.dataset.a=a;el.dataset.b=b;gE.appendChild(el);edgeEls.push(el);
+});
+Object.entries(NODES).forEach(([id,o])=>{
+ const g=document.createElementNS(svgns,'g');g.setAttribute('class','node');g.dataset.id=id;
+ const r=document.createElementNS(svgns,'rect');
+ r.setAttribute('x',o.x);r.setAttribute('y',o.y);r.setAttribute('width',o.w);r.setAttribute('height',o.h);
+ r.setAttribute('rx',10);r.setAttribute('fill',o.big?'rgba(51,196,106,.13)':'#243352');r.setAttribute('stroke',o.c);r.setAttribute('stroke-width',o.big?2:1.4);
+ g.appendChild(r);
+ o._t=[];
+ const n=o.lines.en.length;
+ for(let i=0;i<n;i++){const t=document.createElementNS(svgns,'text');
+  t.setAttribute('x',o.x+o.w/2);t.setAttribute('y',o.y+(o.big?28:22)+i*(o.big?24:17));t.setAttribute('text-anchor','middle');
+  t.setAttribute('font-size',i===0?(o.big?14:12):(o.big?11.5:10));
+  if(i===0){t.setAttribute('font-weight','bold');t.setAttribute('fill',o.c);}else{t.setAttribute('fill','#aebccf');}
+  g.appendChild(t);o._t.push(t);}
+ g.addEventListener('click',()=>select(id));gN.appendChild(g);
+ (LINKS[id]||[]).forEach((l,i)=>{
+  const a=document.createElementNS(svgns,'a');
+  a.setAttribute('href',l.u);a.setAttribute('target','_blank');a.setAttribute('rel','noopener');a.setAttribute('class','lnk');
+  const ti=document.createElementNS(svgns,'title');ti.textContent=l.t;a.appendChild(ti);
+  const cx=o.x+16+i*27, cy=o.y;
+  const c=document.createElementNS(svgns,'circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',11);
+  c.setAttribute('fill','#101a2b');c.setAttribute('stroke',o.c);c.setAttribute('stroke-width',1.4);a.appendChild(c);
+  const t=document.createElementNS(svgns,'text');t.setAttribute('x',cx);t.setAttribute('y',cy+4.5);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',12);
+  t.textContent=l.e;a.appendChild(t);gN.appendChild(a);
+ });
+});
+let curSel='offaps';
+function renderNodeText(){Object.values(NODES).forEach(o=>{o._t.forEach((el,i)=>{el.textContent=(o.lines[LANG]||o.lines.en)[i];});});}
+function renderStatic(){
+ ['lane0','lane1','lane2','lane3'].forEach(k=>document.getElementById(k).textContent=T(LANES[k]));
+ document.getElementById('gaptext').textContent=T(GAPT);
+}
+function select(id){
+ curSel=id;
+ document.querySelectorAll('.node').forEach(n=>n.classList.toggle('sel',n.dataset.id===id));
+ edgeEls.forEach(e=>{const hit=e.dataset.a===id||e.dataset.b===id;e.classList.toggle('hl',hit);e.classList.toggle('dim',!hit);});
+ const d=D[id];const li=o=>(o[LANG]||o.en).map(x=>'<li>'+x+'</li>').join('');
+ document.getElementById('info').innerHTML=
+  '<h2>'+T(d.t)+'</h2><div class="own">'+T(d.o)+'</div>'+
+  '<span class="st" style="border:1px solid '+d.sc+';color:'+d.sc+'">'+T(d.s)+'</span>'+
+  '<h3>'+T(UI.does)+'</h3><p>'+T(d.does)+'</p>'+
+  '<h3>'+T(UI.inputs)+'</h3><ul>'+li(d.i)+'</ul>'+
+  '<h3>'+T(UI.outputs)+'</h3><ul>'+li(d.ou)+'</ul>'+
+  (id==='offaps'
+    ?'<div class="plusbox"><b>'+T(UI.adds)+':</b><br>'+T(d.off)+'</div>'
+    :'<div class="gapbox"><b>'+T(UI.gap)+':</b> '+T(d.gap)+'</div><div class="plusbox"><b>'+T(UI.rel)+':</b> '+T(d.off)+'</div>')+
+  ((LINKS[id]&&LINKS[id].length)
+    ?'<h3>'+T(UI.access)+'</h3><div class="lnkrow">'+LINKS[id].map(l=>'<a class="lnkbtn" href="'+l.u+'" target="_blank" rel="noopener"><span>'+l.e+'</span>'+l.t+'</a>').join('')+'</div>'
+    :'');
+}
+function setLang(l){
+ LANG=l;
+ document.documentElement.lang=l;document.documentElement.dir=(l==='en')?'ltr':'rtl';
+ ['en','fa','ar'].forEach(x=>document.getElementById('l'+x).classList.toggle('on',x===l));
+ renderStatic();renderNodeText();select(curSel);
+}
+setLang('en');
+</script>
+</body>
+</html>
